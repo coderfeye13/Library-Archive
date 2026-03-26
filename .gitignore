@@ -1,0 +1,16 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Dependency directories (remove the comment below if it's there)
+vendor/
+
+# IDE specific files
+.idea/
+.vscode/
+
+# Environment variables
+.env
