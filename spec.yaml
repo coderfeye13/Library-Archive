@@ -1,0 +1,171 @@
+openapi: "3.0.0"
+
+info:
+  title: Library Archive API
+  version: "1.0.0"
+
+paths:
+  /books:
+    get:
+      summary: List all books
+      operationId: listBooks
+      responses:
+        "200":
+          description: A list of books
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Book"
+
+    post:
+      summary: Create a book
+      operationId: createBook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewBook"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+
+  /books/{id}:
+    get:
+      summary: Get a book by ID
+      operationId: getBook
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: A single book
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+        "404":
+          description: Not found
+
+    put:
+      summary: Update a book
+      operationId: updateBook
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewBook"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+
+    delete:
+      summary: Delete a book
+      operationId: deleteBook
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /authors:
+    get:
+      summary: List all authors
+      operationId: listAuthors
+      responses:
+        "200":
+          description: A list of authors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Author"
+
+    post:
+      summary: Create an author
+      operationId: createAuthor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewAuthor"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Author"
+
+components:
+  schemas:
+    Book:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        author_id:
+          type: integer
+        published_year:
+          type: integer
+
+    NewBook:
+      type: object
+      required:
+        - title
+        - author_id
+      properties:
+        title:
+          type: string
+        author_id:
+          type: integer
+        published_year:
+          type: integer
+
+    Author:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        bio:
+          type: string
+
+    NewAuthor:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        bio:
+          type: string
