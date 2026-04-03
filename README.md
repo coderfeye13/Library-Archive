@@ -170,7 +170,7 @@ Server runs at:
 
 Furkan Yilmaz  
 M.Sc. Computer Science Student @ HAW Kiel  
-Interested in Backend, AI, and Cloud Systems
+Software Developer at Baltic Online Computer GmbH
 
 ---
 
