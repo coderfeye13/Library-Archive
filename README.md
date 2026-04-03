@@ -29,17 +29,12 @@ A RESTful API for managing books and authors, built with Go using Echo, GORM, an
 ```mermaid
 flowchart TD
 
-    Client[Client (curl / browser)]
-    
+    Client[Client]
     Router[Echo Router]
-    
-    Handler[Handler Layer<br/>handler.go]
-    
-    DBLayer[Database Layer<br/>db.go]
-    
-    SQLite[(SQLite DB<br/>library.db)]
-    
-    OpenAPI[OpenAPI Spec<br/>spec.yaml + gen.go]
+    Handler[Handler Layer - handler.go]
+    DBLayer[Database Layer - db.go]
+    SQLite[(SQLite DB - library.db)]
+    OpenAPI[OpenAPI Spec - spec.yaml + gen.go]
 
     Client --> Router
     Router --> Handler
