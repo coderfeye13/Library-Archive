@@ -14,3 +14,11 @@ vendor/
 
 # Environment variables
 .env
+# database
+library.db
+
+# macOS
+.DS_Store
+
+# Go build
+/bin
