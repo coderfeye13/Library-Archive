@@ -27,6 +27,7 @@ type Author struct {
 
 // Book defines model for Book.
 type Book struct {
+	Author        *Author `json:"author,omitempty"`
 	AuthorId      *int    `json:"author_id,omitempty"`
 	Id            *int    `json:"id,omitempty"`
 	PublishedYear *int    `json:"published_year,omitempty"`
@@ -210,16 +211,16 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/8RVT2+bMBT/Kpa3Iyrp1hM3skpVpKnaZaeqqgy8JK8F27MfnVDEd59sk0KBRMu2ZCes",
-	"xzO/P+9ns+O5qrSSIMnyZMdtvoVK+GVa01YZt9JGaTCE4OsZKvegRgNPuCWDcsPbiGMxKKMk2IBxdSkq",
-	"mNnQRvuKyp4hJ9e6VOplCig8kadD3z9U13VWot1C8dSAMPM9hFT+Lrl7+HmqJYelG/hRo4GCJw+h63Ee",
-	"8Y8c+UvlQ26hLRogTom6PSjXwYLwWf4VMyNMw1KTb/EVWPptxSP+Csaikjzh11eLq4XjoTRIoZEn/LMv",
-	"RVwL2nqVcQD16w2QezgTBKGSq8KDWEq7HkfbaiVtcOjTYuEeuZIE0m8VWpeY+83xs3Uk9ml3KySo/MaP",
-	"BtY84R/i/lzE3aGIu/H34RDGiCYYUIDNDWoK8lJWoiWm1myvwfXYuqqEaTrmTJRl/zriWtkZjV8MCIIO",
-	"OcwGLC1V0Zyk75isPtjt+/GTqaGdGHv9z4CHqO/9C6qLkWuhyoTsbPOv40ypl+MZWfqOSyTEH9eT8hHY",
-	"H0hH9/J4Njzm2ZIRFF02Fz3mKanwbg0iEe+waB1UASUQTO279fXOPi2MqIDAXTcPO44Oz91EfH+Lu//M",
-	"2IRoIGh8xbaPE4duApuhpMBhLClU3yRF89G+A7og+cXZx5syi3JTwpvqmznH7hWxtarl2LM7oM4wljVs",
-	"dRt+hDO2fdeFOPfY//NRPP+sgonjGYRqfxTb9lcAAAD//yeLlS5gCgAA",
+	"H4sIAAAAAAAC/8RVTWvjPBD+K0LvezR1utuTb+4WSmApe9lTKUG2J8m0tqSVxl1M8H9f9JHEdZzQwCZ7",
+	"shiN8nzMI2XDS9VoJUGS5dmG23INjfDLvKW1Mm6ljdJgCMHXC1TuQ50GnnFLBuWK9wnHalBGSbAC4+pS",
+	"NDBxoE+2FVW8Qkmu9V6pt0NAsSPyv4Elz/h/6Z50GhmnkW6fxP7FMT7H6rotarRrqBYdCDPdQ0j1Z8U8",
+	"we9zLTxulYFfLRqoePYcul6mEU85uLiQ8iG30DacwSFRdwblMlgQfpZ/x8II07HclGt8B5b/mPOEv4Ox",
+	"qCTP+O3N7GbmeCgNUmjkGf/qSwnXgtZeZRpA/XoF5D7OBEGo5LzyIJby2ONoW62kDQ59mc3cp1SSQPqj",
+	"QusaS384fbWOxPZ2uBUSNPbzkYwOCGNEFwyowJYGNQV5OavRElNLttXgemzbNMJ0kTkTdb3fTrhWdkLj",
+	"NwOCICKH2YCle1V1Z+k7JWsf7P7j+Mm00B8Ye/vXgIeoH/0LqquRa6HKhIy2+e20UOrtdEbufcc1EuKv",
+	"61n5COyPpCNuns6Gx7xYMoKi6+Zij3lOKrxbg0ikG6x6B1VBDQSH9j34erRPCyMaIHDPzfOGo8NzLxHf",
+	"vuLuf2ZsQjIQNH5i+5cDh+4Cm6GkwGEsKVR3kpLpaD8CXZH87OLjzZlFuaphp/puyrEnRWypWjn27BEo",
+	"GsaKjs0fwh/hhG0/dSUuPfZ/fBUvP6tg4ngGobq/in3/JwAA//9qyWVEkAoAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

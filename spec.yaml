@@ -136,6 +136,8 @@ components:
           type: integer
         published_year:
           type: integer
+        author:
+          $ref: "#/components/schemas/Author"
 
     NewBook:
       type: object

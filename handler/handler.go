@@ -16,7 +16,7 @@ type Handler struct {
 
 func (h *Handler) ListBooks(ctx echo.Context) error {
 	var books []db.Book
-	result := h.DB.Find(&books)
+	result := h.DB.Preload("Author").Find(&books)
 	if result.Error != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{
 			"error": result.Error.Error(),
@@ -28,11 +28,23 @@ func (h *Handler) ListBooks(ctx echo.Context) error {
 		id := int(b.ID)
 		year := b.PublishedYear
 		authorID := int(b.AuthorID)
+
+		var apiAuthor *api.Author
+		if b.Author.ID != 0 {
+			authorObjID := int(b.Author.ID)
+			apiAuthor = &api.Author{
+				Id:   &authorObjID,
+				Name: &b.Author.Name,
+				Bio:  &b.Author.Bio,
+			}
+		}
+
 		response = append(response, api.Book{
 			Id:            &id,
 			Title:         &b.Title,
 			AuthorId:      &authorID,
 			PublishedYear: &year,
+			Author:        apiAuthor,
 		})
 	}
 
@@ -49,9 +61,8 @@ func (h *Handler) CreateBook(ctx echo.Context) error {
 	}
 
 	book := db.Book{
-		Title:         body.Title,
-		AuthorID:      uint(body.AuthorId),
-		PublishedYear: 0,
+		Title:    body.Title,
+		AuthorID: uint(body.AuthorId),
 	}
 	if body.PublishedYear != nil {
 		book.PublishedYear = *body.PublishedYear
@@ -77,7 +88,7 @@ func (h *Handler) CreateBook(ctx echo.Context) error {
 func (h *Handler) GetBook(ctx echo.Context, id int) error {
 	var book db.Book
 
-	result := h.DB.First(&book, id)
+	result := h.DB.Preload("Author").First(&book, id)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return ctx.JSON(http.StatusNotFound, map[string]string{
@@ -91,11 +102,23 @@ func (h *Handler) GetBook(ctx echo.Context, id int) error {
 
 	bookID := int(book.ID)
 	authorID := int(book.AuthorID)
+
+	var apiAuthor *api.Author
+	if book.Author.ID != 0 {
+		authorObjID := int(book.Author.ID)
+		apiAuthor = &api.Author{
+			Id:   &authorObjID,
+			Name: &book.Author.Name,
+			Bio:  &book.Author.Bio,
+		}
+	}
+
 	return ctx.JSON(http.StatusOK, api.Book{
 		Id:            &bookID,
 		Title:         &book.Title,
 		AuthorId:      &authorID,
 		PublishedYear: &book.PublishedYear,
+		Author:        apiAuthor,
 	})
 }
 
