@@ -6,6 +6,8 @@ require (
 	github.com/getkin/kin-openapi v0.134.0
 	github.com/labstack/echo/v4 v4.15.1
 	github.com/oapi-codegen/runtime v1.3.1
+	gorm.io/driver/sqlite v1.6.0
+	gorm.io/gorm v1.30.0
 )
 
 require (
@@ -33,6 +35,4 @@ require (
 	golang.org/x/sys v0.39.0 // indirect
 	golang.org/x/text v0.32.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gorm.io/driver/sqlite v1.6.0 // indirect
-	gorm.io/gorm v1.30.0 // indirect
 )
