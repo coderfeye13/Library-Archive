@@ -11,20 +11,7 @@ import (
 
 func main() {
 	db.Connect()
-
-	db.DB.Exec(`CREATE TABLE IF NOT EXISTS books (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT,
-        author_id INTEGER,
-        published_year INTEGER
-    )`)
-
-	db.DB.Exec(`CREATE TABLE IF NOT EXISTS authors (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
-        bio TEXT
-    )`)
-
+	db.DB.AutoMigrate(&db.Author{}, &db.Book{})
 	h := &handler.Handler{DB: db.DB}
 
 	e := echo.New()
