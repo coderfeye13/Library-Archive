@@ -7,11 +7,13 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 func main() {
 	db.Connect()
 	db.DB.AutoMigrate(&db.Author{}, &db.Book{})
+
 	h := &handler.Handler{DB: db.DB}
 
 	e := echo.New()
@@ -27,5 +29,9 @@ func main() {
 		return c.JSON(http.StatusOK, swagger)
 	})
 
-	e.Start(":8080") // en sona
+	e.GET("/swagger/*", echoSwagger.EchoWrapHandler(
+		echoSwagger.URL("http://localhost:8080/openapi.json"),
+	))
+
+	e.Start(":8080")
 }
