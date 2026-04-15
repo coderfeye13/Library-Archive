@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 func main() {
@@ -29,9 +28,7 @@ func main() {
 		return c.JSON(http.StatusOK, swagger)
 	})
 
-	e.GET("/swagger/*", echoSwagger.EchoWrapHandler(
-		echoSwagger.URL("http://localhost:8080/openapi.json"),
-	))
+	e.Static("/swagger", "static")
 
 	e.Start(":8080")
 }
