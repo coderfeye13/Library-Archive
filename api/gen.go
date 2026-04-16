@@ -18,6 +18,11 @@ import (
 	"github.com/oapi-codegen/runtime"
 )
 
+// AssignAuthor defines model for AssignAuthor.
+type AssignAuthor struct {
+	AuthorId int `json:"author_id"`
+}
+
 // Author defines model for Author.
 type Author struct {
 	Bio  *string `json:"bio,omitempty"`
@@ -27,7 +32,7 @@ type Author struct {
 
 // Book defines model for Book.
 type Book struct {
-	Author        *Author `json:"author,omitempty"`   //bu geldi buraya oapi-codegen calisinca
+	Author        *Author `json:"author,omitempty"`
 	AuthorId      *int    `json:"author_id,omitempty"`
 	Id            *int    `json:"id,omitempty"`
 	PublishedYear *int    `json:"published_year,omitempty"`
@@ -50,11 +55,17 @@ type NewBook struct {
 // CreateAuthorJSONRequestBody defines body for CreateAuthor for application/json ContentType.
 type CreateAuthorJSONRequestBody = NewAuthor
 
+// UpdateAuthorJSONRequestBody defines body for UpdateAuthor for application/json ContentType.
+type UpdateAuthorJSONRequestBody = NewAuthor
+
 // CreateBookJSONRequestBody defines body for CreateBook for application/json ContentType.
 type CreateBookJSONRequestBody = NewBook
 
 // UpdateBookJSONRequestBody defines body for UpdateBook for application/json ContentType.
 type UpdateBookJSONRequestBody = NewBook
+
+// AssignAuthorToBookJSONRequestBody defines body for AssignAuthorToBook for application/json ContentType.
+type AssignAuthorToBookJSONRequestBody = AssignAuthor
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -64,6 +75,18 @@ type ServerInterface interface {
 	// Create an author
 	// (POST /authors)
 	CreateAuthor(ctx echo.Context) error
+	// Delete an author
+	// (DELETE /authors/{id})
+	DeleteAuthor(ctx echo.Context, id int) error
+	// Get an author by ID
+	// (GET /authors/{id})
+	GetAuthor(ctx echo.Context, id int) error
+	// Update an author
+	// (PUT /authors/{id})
+	UpdateAuthor(ctx echo.Context, id int) error
+	// Get all books by author
+	// (GET /authors/{id}/books)
+	GetBooksByAuthor(ctx echo.Context, id int) error
 	// List all books
 	// (GET /books)
 	ListBooks(ctx echo.Context) error
@@ -79,6 +102,9 @@ type ServerInterface interface {
 	// Update a book
 	// (PUT /books/{id})
 	UpdateBook(ctx echo.Context, id int) error
+	// Assign author to book
+	// (PUT /books/{id}/author)
+	AssignAuthorToBook(ctx echo.Context, id int) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -101,6 +127,70 @@ func (w *ServerInterfaceWrapper) CreateAuthor(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CreateAuthor(ctx)
+	return err
+}
+
+// DeleteAuthor converts echo context to params.
+func (w *ServerInterfaceWrapper) DeleteAuthor(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id int
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.DeleteAuthor(ctx, id)
+	return err
+}
+
+// GetAuthor converts echo context to params.
+func (w *ServerInterfaceWrapper) GetAuthor(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id int
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetAuthor(ctx, id)
+	return err
+}
+
+// UpdateAuthor converts echo context to params.
+func (w *ServerInterfaceWrapper) UpdateAuthor(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id int
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.UpdateAuthor(ctx, id)
+	return err
+}
+
+// GetBooksByAuthor converts echo context to params.
+func (w *ServerInterfaceWrapper) GetBooksByAuthor(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id int
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetBooksByAuthor(ctx, id)
 	return err
 }
 
@@ -170,6 +260,22 @@ func (w *ServerInterfaceWrapper) UpdateBook(ctx echo.Context) error {
 	return err
 }
 
+// AssignAuthorToBook converts echo context to params.
+func (w *ServerInterfaceWrapper) AssignAuthorToBook(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id int
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AssignAuthorToBook(ctx, id)
+	return err
+}
+
 // This is a simple interface which specifies echo.Route addition functions which
 // are present on both echo.Echo and echo.Group, since we want to allow using
 // either of them for path registration
@@ -200,27 +306,35 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 
 	router.GET(baseURL+"/authors", wrapper.ListAuthors)
 	router.POST(baseURL+"/authors", wrapper.CreateAuthor)
+	router.DELETE(baseURL+"/authors/:id", wrapper.DeleteAuthor)
+	router.GET(baseURL+"/authors/:id", wrapper.GetAuthor)
+	router.PUT(baseURL+"/authors/:id", wrapper.UpdateAuthor)
+	router.GET(baseURL+"/authors/:id/books", wrapper.GetBooksByAuthor)
 	router.GET(baseURL+"/books", wrapper.ListBooks)
 	router.POST(baseURL+"/books", wrapper.CreateBook)
 	router.DELETE(baseURL+"/books/:id", wrapper.DeleteBook)
 	router.GET(baseURL+"/books/:id", wrapper.GetBook)
 	router.PUT(baseURL+"/books/:id", wrapper.UpdateBook)
+	router.PUT(baseURL+"/books/:id/author", wrapper.AssignAuthorToBook)
 
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/8RVTWvjPBD+K0LvezR1utuTb+4WSmApe9lTKUG2J8m0tqSVxl1M8H9f9JHEdZzQwCZ7",
-	"shiN8nzMI2XDS9VoJUGS5dmG23INjfDLvKW1Mm6ljdJgCMHXC1TuQ50GnnFLBuWK9wnHalBGSbAC4+pS",
-	"NDBxoE+2FVW8Qkmu9V6pt0NAsSPyv4Elz/h/6Z50GhmnkW6fxP7FMT7H6rotarRrqBYdCDPdQ0j1Z8U8",
-	"we9zLTxulYFfLRqoePYcul6mEU85uLiQ8iG30DacwSFRdwblMlgQfpZ/x8II07HclGt8B5b/mPOEv4Ox",
-	"qCTP+O3N7GbmeCgNUmjkGf/qSwnXgtZeZRpA/XoF5D7OBEGo5LzyIJby2ONoW62kDQ59mc3cp1SSQPqj",
-	"QusaS384fbWOxPZ2uBUSNPbzkYwOCGNEFwyowJYGNQV5OavRElNLttXgemzbNMJ0kTkTdb3fTrhWdkLj",
-	"NwOCICKH2YCle1V1Z+k7JWsf7P7j+Mm00B8Ye/vXgIeoH/0LqquRa6HKhIy2+e20UOrtdEbufcc1EuKv",
-	"61n5COyPpCNuns6Gx7xYMoKi6+Zij3lOKrxbg0ikG6x6B1VBDQSH9j34erRPCyMaIHDPzfOGo8NzLxHf",
-	"vuLuf2ZsQjIQNH5i+5cDh+4Cm6GkwGEsKVR3kpLpaD8CXZH87OLjzZlFuaphp/puyrEnRWypWjn27BEo",
-	"GsaKjs0fwh/hhG0/dSUuPfZ/fBUvP6tg4ngGobq/in3/JwAA//9qyWVEkAoAAA==",
+	"H4sIAAAAAAAC/9RYQW/bPAz9Kwa/72jU6dZTbu4KFAWGYoftVBSFYjOJWlvSJKaDEfi/D5Ls2m1kI96W",
+	"ND1FkUiT75HUS7yFTJZKChRkYL4Fk62xZG6ZGsNXIt3QWmr7XWmpUBNHd8rc/gPP7ReqFMIcuCBcoYa6",
+	"jkHjzw3XmMP8rmd7H7e2cvGIGUEdw1CEBZe9ZxvSXKysfThkDIKVGHCoAyEvpXwagmRX/2tcwhz+Szpy",
+	"koaZpEm3jscpGM5TbRYFN2vMHypkOmxDnIp9wdzir6kUDlPVL5uzug9HHGPw4UDI+7l5s3i0tawPF0tP",
+	"gX8sfOULzXQVpTpb82eM0m83EMMzasOlgDmcn83OZjYPqVAwxWEOn91WDIrR2qFMfFC3XiHZD0sCIy7F",
+	"Te6CGEobG5u2UVIYz9Cn2cx+ZFIQCufKlCp45pyTR2OTaKfQrjhhafZvyYYBpjWrPAE5mkxzRR5eGhXc",
+	"UCSXUYvB2phNWTJdNZlHrCi64xiUNAGMXzQywiayrw0aupR5NQnfGKyusevX5Se9wXqH2PN/Frgf9TV/",
+	"HnX+hjW/GzHR0OaO2y5JtjyvbcQcCyTcZfLK7b8wqZhmJRLa/rrbArdhbetBO7b2YnnLRtxDtnMZ3+9Q",
+	"deHz6SPzWeS24Beh81tJ0VJuxFvs3q+PPQ4PxTXSUTHOjtAOaWS4WBXYwz6JvGukjrloUUU3V/6eDPD3",
+	"Q+Xs8G3y7lN8jLJ5Kqf3uvcbm/NkIeXTsDBcI1nhNJfVCY/CXpLj9H+S4DhmbI/Tmpu/Gpii6B7WL8Q4",
+	"91baHPlwwvwMyXFzOC7GLubBhtgjOq4QdzGnyLBjq9cSeypwQ997629QXRtI8ei18uGEdai8L7Laop5+",
+	"RzjXvRT1sMy98ygevlYvWhpUyuAoJt0f7WBd+i8evsuPVp9Xr01OpEg+m4i51P7gh4/H1P5OJdmWta5/",
+	"BwAA//9SgmUfQBIAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
