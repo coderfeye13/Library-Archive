@@ -233,3 +233,27 @@ func (h *Handler) CreateAuthor(ctx echo.Context) error {
 		Bio:  &author.Bio,
 	})
 }
+func (h *Handler) GetAuthor(ctx echo.Context, id int) error {
+	// TODO: implement
+	return ctx.JSON(http.StatusNotImplemented, map[string]string{"error": "not implemented"})
+}
+
+func (h *Handler) UpdateAuthor(ctx echo.Context, id int) error {
+	// TODO: implement
+	return ctx.JSON(http.StatusNotImplemented, map[string]string{"error": "not implemented"})
+}
+
+func (h *Handler) DeleteAuthor(ctx echo.Context, id int) error {
+	// TODO: implement
+	return ctx.JSON(http.StatusNotImplemented, map[string]string{"error": "not implemented"})
+}
+
+func (h *Handler) GetBooksByAuthor(ctx echo.Context, id int) error {
+	// TODO: implement
+	return ctx.JSON(http.StatusNotImplemented, map[string]string{"error": "not implemented"})
+}
+
+func (h *Handler) AssignAuthorToBook(ctx echo.Context, id int) error {
+	// TODO: implement
+	return ctx.JSON(http.StatusNotImplemented, map[string]string{"error": "not implemented"})
+}
