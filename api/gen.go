@@ -27,7 +27,7 @@ type Author struct {
 
 // Book defines model for Book.
 type Book struct {
-	Author        *Author `json:"author,omitempty"`
+	Author        *Author `json:"author,omitempty"`   //bu geldi buraya oapi-codegen calisinca
 	AuthorId      *int    `json:"author_id,omitempty"`
 	Id            *int    `json:"id,omitempty"`
 	PublishedYear *int    `json:"published_year,omitempty"`

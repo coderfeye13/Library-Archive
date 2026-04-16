@@ -11,13 +11,14 @@ import (
 
 func main() {
 	db.Connect()
-	db.DB.AutoMigrate(&db.Author{}, &db.Book{})
+	//GORM semayi yonetiyor otomatik olarak
+	db.DB.AutoMigrate(&db.Author{}, &db.Book{}) // author once geliyor-> book tablosu foreign key pointing to authors
 
-	h := &handler.Handler{DB: db.DB}
+	h := &handler.Handler{DB: db.DB} //handler db yi alir
 
-	e := echo.New()
-	api.RegisterHandlers(e, h)
-
+	e := echo.New()            //http server baslatir
+	api.RegisterHandlers(e, h) //url-handler eslesme tanimlar
+	//added for full specification over HTTP
 	e.GET("/openapi.json", func(c echo.Context) error {
 		swagger, err := api.GetSwagger()
 		if err != nil {

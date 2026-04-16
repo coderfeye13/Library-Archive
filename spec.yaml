@@ -91,6 +91,32 @@ paths:
       responses:
         "204":
           description: Deleted
+#Kitaba farklı yazar ata
+  /books/{id}/author:
+    put:
+      summary: Assign author to book
+      operationId: assignAuthorToBook
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssignAuthor"
+      responses:
+        "200":
+          description: Author assigned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+        "404":
+          description: Not found
 
   /authors:
     get:
@@ -123,6 +149,89 @@ paths:
               schema:
                 $ref: "#/components/schemas/Author"
 
+  /authors/{id}:
+    #Tek author getir
+    get:
+      summary: Get an author by ID
+      operationId: getAuthor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: A single author
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Author"
+        "404":
+          description: Not found
+    #Author güncelle
+    put:
+      summary: Update an author
+      operationId: updateAuthor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewAuthor"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Author"
+        "404":
+          description: Not found
+    #Author sil
+    delete:
+      summary: Delete an author
+      operationId: deleteAuthor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+  #Bu yazara ait kitapları getir
+  /authors/{id}/books:
+    get:
+      summary: Get all books by author
+      operationId: getBooksByAuthor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: A list of books by this author
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Book"
+        "404":
+          description: Not found
+
 components:
   schemas:
     Book:
@@ -150,6 +259,14 @@ components:
         author_id:
           type: integer
         published_year:
+          type: integer
+
+    AssignAuthor:
+      type: object
+      required:
+        - author_id
+      properties:
+        author_id:
           type: integer
 
     Author:

@@ -16,13 +16,14 @@ type Handler struct {
 
 func (h *Handler) ListBooks(ctx echo.Context) error {
 	var books []db.Book
+	// One call — GORM runs two SQL queries internally
 	result := h.DB.Preload("Author").Find(&books)
 	if result.Error != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{
 			"error": result.Error.Error(),
 		})
 	}
-
+	// GORM runs and convert db.Book -> api.book before sending the response
 	var response []api.Book
 	for _, b := range books {
 		id := int(b.ID)
@@ -52,6 +53,7 @@ func (h *Handler) ListBooks(ctx echo.Context) error {
 }
 
 func (h *Handler) CreateBook(ctx echo.Context) error {
+	//API Layer clienttan gelen JSON oku
 	var body api.NewBook
 
 	if err := ctx.Bind(&body); err != nil {
@@ -59,7 +61,7 @@ func (h *Handler) CreateBook(ctx echo.Context) error {
 			"error": err.Error(),
 		})
 	}
-
+	//DB Layer GORM MOdel create and save
 	book := db.Book{
 		Title:    body.Title,
 		AuthorID: uint(body.AuthorId),
@@ -74,7 +76,7 @@ func (h *Handler) CreateBook(ctx echo.Context) error {
 			"error": result.Error.Error(),
 		})
 	}
-
+	//API Layer response api.Book
 	id := int(book.ID)
 	authorID := int(book.AuthorID)
 	return ctx.JSON(http.StatusCreated, api.Book{
@@ -86,6 +88,7 @@ func (h *Handler) CreateBook(ctx echo.Context) error {
 }
 
 func (h *Handler) GetBook(ctx echo.Context, id int) error {
+	//DB Layer
 	var book db.Book
 
 	result := h.DB.Preload("Author").First(&book, id)
@@ -99,7 +102,7 @@ func (h *Handler) GetBook(ctx echo.Context, id int) error {
 			"error": result.Error.Error(),
 		})
 	}
-
+	//API Layer
 	bookID := int(book.ID)
 	authorID := int(book.AuthorID)
 
