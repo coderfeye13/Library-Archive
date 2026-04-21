@@ -234,26 +234,183 @@ func (h *Handler) CreateAuthor(ctx echo.Context) error {
 	})
 }
 func (h *Handler) GetAuthor(ctx echo.Context, id int) error {
-	// TODO: implement
-	return ctx.JSON(http.StatusNotImplemented, map[string]string{"error": "not implemented"})
+	var author db.Author
+
+	result := h.DB.First(&author, id)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return ctx.JSON(http.StatusNotFound, map[string]string{
+				"error": "author not found",
+			})
+		}
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{
+			"error": result.Error.Error(),
+		})
+	}
+
+	authorID := int(author.ID)
+	return ctx.JSON(http.StatusOK, api.Author{
+		Id:   &authorID,
+		Name: &author.Name,
+		Bio:  &author.Bio,
+	})
 }
 
 func (h *Handler) UpdateAuthor(ctx echo.Context, id int) error {
-	// TODO: implement
-	return ctx.JSON(http.StatusNotImplemented, map[string]string{"error": "not implemented"})
+	var author db.Author
+	var body api.NewAuthor
+
+	if err := ctx.Bind(&body); err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
+	result := h.DB.First(&author, id)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return ctx.JSON(http.StatusNotFound, map[string]string{
+				"error": "author not found",
+			})
+		}
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{
+			"error": result.Error.Error(),
+		})
+	}
+
+	author.Name = body.Name
+	if body.Bio != nil {
+		author.Bio = *body.Bio
+	}
+
+	result = h.DB.Save(&author)
+	if result.Error != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{
+			"error": result.Error.Error(),
+		})
+	}
+
+	authorID := int(author.ID)
+	return ctx.JSON(http.StatusOK, api.Author{
+		Id:   &authorID,
+		Name: &author.Name,
+		Bio:  &author.Bio,
+	})
 }
 
 func (h *Handler) DeleteAuthor(ctx echo.Context, id int) error {
-	// TODO: implement
-	return ctx.JSON(http.StatusNotImplemented, map[string]string{"error": "not implemented"})
+	result := h.DB.Delete(&db.Author{}, id)
+	if result.Error != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{
+			"error": result.Error.Error(),
+		})
+	}
+
+	return ctx.NoContent(http.StatusNoContent)
 }
 
 func (h *Handler) GetBooksByAuthor(ctx echo.Context, id int) error {
-	// TODO: implement
-	return ctx.JSON(http.StatusNotImplemented, map[string]string{"error": "not implemented"})
+	// author var mı kontrol et
+	var author db.Author
+	result := h.DB.First(&author, id)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return ctx.JSON(http.StatusNotFound, map[string]string{
+				"error": "author not found",
+			})
+		}
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{
+			"error": result.Error.Error(),
+		})
+	}
+
+	// bu yazara ait kitapları getir
+	var books []db.Book
+	result = h.DB.Preload("Author").Where("author_id = ?", id).Find(&books)
+	if result.Error != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{
+			"error": result.Error.Error(),
+		})
+	}
+
+	var response []api.Book
+	for _, b := range books {
+		bookID := int(b.ID)
+		authorID := int(b.AuthorID)
+		authorObjID := int(b.Author.ID)
+
+		response = append(response, api.Book{
+			Id:            &bookID,
+			Title:         &b.Title,
+			AuthorId:      &authorID,
+			PublishedYear: &b.PublishedYear,
+			Author: &api.Author{
+				Id:   &authorObjID,
+				Name: &b.Author.Name,
+				Bio:  &b.Author.Bio,
+			},
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, response)
 }
 
 func (h *Handler) AssignAuthorToBook(ctx echo.Context, id int) error {
-	// TODO: implement
-	return ctx.JSON(http.StatusNotImplemented, map[string]string{"error": "not implemented"})
+	var body api.AssignAuthor
+
+	if err := ctx.Bind(&body); err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
+	// kitap var mı kontrol et
+	var book db.Book
+	result := h.DB.First(&book, id)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return ctx.JSON(http.StatusNotFound, map[string]string{
+				"error": "book not found",
+			})
+		}
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{
+			"error": result.Error.Error(),
+		})
+	}
+
+	// yazar var mı kontrol et
+	var author db.Author
+	result = h.DB.First(&author, body.AuthorId)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return ctx.JSON(http.StatusNotFound, map[string]string{
+				"error": "author not found",
+			})
+		}
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{
+			"error": result.Error.Error(),
+		})
+	}
+
+	// sadece author_id güncelle
+	book.AuthorID = uint(body.AuthorId)
+	result = h.DB.Save(&book)
+	if result.Error != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{
+			"error": result.Error.Error(),
+		})
+	}
+
+	bookID := int(book.ID)
+	authorID := int(author.ID)
+	return ctx.JSON(http.StatusOK, api.Book{
+		Id:       &bookID,
+		Title:    &book.Title,
+		AuthorId: &authorID,
+		Author: &api.Author{
+			Id:   &authorID,
+			Name: &author.Name,
+			Bio:  &author.Bio,
+		},
+	})
 }
