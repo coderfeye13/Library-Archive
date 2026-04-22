@@ -16,14 +16,13 @@ type Handler struct {
 
 func (h *Handler) ListBooks(ctx echo.Context) error {
 	var books []db.Book
-	// One call — GORM runs two SQL queries internally
 	result := h.DB.Preload("Author").Find(&books)
 	if result.Error != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{
 			"error": result.Error.Error(),
 		})
 	}
-	// GORM runs and convert db.Book -> api.book before sending the response
+
 	var response []api.Book
 	for _, b := range books {
 		id := int(b.ID)
@@ -53,7 +52,6 @@ func (h *Handler) ListBooks(ctx echo.Context) error {
 }
 
 func (h *Handler) CreateBook(ctx echo.Context) error {
-	//API Layer clienttan gelen JSON oku
 	var body api.NewBook
 
 	if err := ctx.Bind(&body); err != nil {
@@ -61,7 +59,36 @@ func (h *Handler) CreateBook(ctx echo.Context) error {
 			"error": err.Error(),
 		})
 	}
-	//DB Layer GORM MOdel create and save
+
+	if body.Title == "" {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{
+			"error": "title cannot be empty",
+		})
+	}
+	if body.AuthorId <= 0 {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{
+			"error": "author_id must be a positive number",
+		})
+	}
+	if body.PublishedYear != nil && *body.PublishedYear < 0 {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{
+			"error": "published_year cannot be negative",
+		})
+	}
+
+	var author db.Author
+	result := h.DB.First(&author, body.AuthorId)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return ctx.JSON(http.StatusBadRequest, map[string]string{
+				"error": "author not found",
+			})
+		}
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{
+			"error": result.Error.Error(),
+		})
+	}
+
 	book := db.Book{
 		Title:    body.Title,
 		AuthorID: uint(body.AuthorId),
@@ -70,13 +97,13 @@ func (h *Handler) CreateBook(ctx echo.Context) error {
 		book.PublishedYear = *body.PublishedYear
 	}
 
-	result := h.DB.Create(&book)
+	result = h.DB.Create(&book)
 	if result.Error != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{
 			"error": result.Error.Error(),
 		})
 	}
-	//API Layer response api.Book
+
 	id := int(book.ID)
 	authorID := int(book.AuthorID)
 	return ctx.JSON(http.StatusCreated, api.Book{
@@ -88,7 +115,6 @@ func (h *Handler) CreateBook(ctx echo.Context) error {
 }
 
 func (h *Handler) GetBook(ctx echo.Context, id int) error {
-	//DB Layer
 	var book db.Book
 
 	result := h.DB.Preload("Author").First(&book, id)
@@ -102,7 +128,7 @@ func (h *Handler) GetBook(ctx echo.Context, id int) error {
 			"error": result.Error.Error(),
 		})
 	}
-	//API Layer
+
 	bookID := int(book.ID)
 	authorID := int(book.AuthorID)
 
@@ -132,6 +158,23 @@ func (h *Handler) UpdateBook(ctx echo.Context, id int) error {
 	if err := ctx.Bind(&body); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{
 			"error": err.Error(),
+		})
+	}
+
+	// Validation
+	if body.Title == "" {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{
+			"error": "title cannot be empty",
+		})
+	}
+	if body.AuthorId <= 0 {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{
+			"error": "author_id must be a positive number",
+		})
+	}
+	if body.PublishedYear != nil && *body.PublishedYear < 0 {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{
+			"error": "published_year cannot be negative",
 		})
 	}
 
@@ -212,6 +255,12 @@ func (h *Handler) CreateAuthor(ctx echo.Context) error {
 		})
 	}
 
+	if body.Name == "" {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{
+			"error": "name cannot be empty",
+		})
+	}
+
 	author := db.Author{
 		Name: body.Name,
 	}
@@ -233,6 +282,7 @@ func (h *Handler) CreateAuthor(ctx echo.Context) error {
 		Bio:  &author.Bio,
 	})
 }
+
 func (h *Handler) GetAuthor(ctx echo.Context, id int) error {
 	var author db.Author
 
@@ -263,6 +313,13 @@ func (h *Handler) UpdateAuthor(ctx echo.Context, id int) error {
 	if err := ctx.Bind(&body); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{
 			"error": err.Error(),
+		})
+	}
+
+	// Validation
+	if body.Name == "" {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{
+			"error": "name cannot be empty",
 		})
 	}
 
@@ -310,7 +367,6 @@ func (h *Handler) DeleteAuthor(ctx echo.Context, id int) error {
 }
 
 func (h *Handler) GetBooksByAuthor(ctx echo.Context, id int) error {
-	// author var mı kontrol et
 	var author db.Author
 	result := h.DB.First(&author, id)
 	if result.Error != nil {
@@ -324,7 +380,6 @@ func (h *Handler) GetBooksByAuthor(ctx echo.Context, id int) error {
 		})
 	}
 
-	// bu yazara ait kitapları getir
 	var books []db.Book
 	result = h.DB.Preload("Author").Where("author_id = ?", id).Find(&books)
 	if result.Error != nil {
@@ -364,7 +419,6 @@ func (h *Handler) AssignAuthorToBook(ctx echo.Context, id int) error {
 		})
 	}
 
-	// kitap var mı kontrol et
 	var book db.Book
 	result := h.DB.First(&book, id)
 	if result.Error != nil {
@@ -378,7 +432,6 @@ func (h *Handler) AssignAuthorToBook(ctx echo.Context, id int) error {
 		})
 	}
 
-	// yazar var mı kontrol et
 	var author db.Author
 	result = h.DB.First(&author, body.AuthorId)
 	if result.Error != nil {
@@ -392,7 +445,6 @@ func (h *Handler) AssignAuthorToBook(ctx echo.Context, id int) error {
 		})
 	}
 
-	// sadece author_id güncelle
 	book.AuthorID = uint(body.AuthorId)
 	result = h.DB.Save(&book)
 	if result.Error != nil {
