@@ -14,9 +14,21 @@ type Handler struct {
 	DB *gorm.DB
 }
 
-func (h *Handler) ListBooks(ctx echo.Context) error {
+func (h *Handler) ListBooks(ctx echo.Context, params api.ListBooksParams) error {
+	page := 1
+	limit := 10
+
+	if params.Page != nil && *params.Page > 0 {
+		page = *params.Page
+	}
+	if params.Limit != nil && *params.Limit > 0 {
+		limit = *params.Limit
+	}
+
+	offset := (page - 1) * limit
+
 	var books []db.Book
-	result := h.DB.Preload("Author").Find(&books)
+	result := h.DB.Preload("Author").Offset(offset).Limit(limit).Find(&books)
 	if result.Error != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{
 			"error": result.Error.Error(),
@@ -161,7 +173,6 @@ func (h *Handler) UpdateBook(ctx echo.Context, id int) error {
 		})
 	}
 
-	// Validation
 	if body.Title == "" {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{
 			"error": "title cannot be empty",
@@ -224,9 +235,21 @@ func (h *Handler) DeleteBook(ctx echo.Context, id int) error {
 	return ctx.NoContent(http.StatusNoContent)
 }
 
-func (h *Handler) ListAuthors(ctx echo.Context) error {
+func (h *Handler) ListAuthors(ctx echo.Context, params api.ListAuthorsParams) error {
+	page := 1
+	limit := 10
+
+	if params.Page != nil && *params.Page > 0 {
+		page = *params.Page
+	}
+	if params.Limit != nil && *params.Limit > 0 {
+		limit = *params.Limit
+	}
+
+	offset := (page - 1) * limit
+
 	var authors []db.Author
-	result := h.DB.Find(&authors)
+	result := h.DB.Offset(offset).Limit(limit).Find(&authors)
 	if result.Error != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{
 			"error": result.Error.Error(),
@@ -316,7 +339,6 @@ func (h *Handler) UpdateAuthor(ctx echo.Context, id int) error {
 		})
 	}
 
-	// Validation
 	if body.Name == "" {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{
 			"error": "name cannot be empty",

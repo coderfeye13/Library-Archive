@@ -9,6 +9,17 @@ paths:
     get:
       summary: List all books
       operationId: listBooks
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
       responses:
         "200":
           description: A list of books
@@ -91,7 +102,7 @@ paths:
       responses:
         "204":
           description: Deleted
-#Kitaba farklı yazar ata
+
   /books/{id}/author:
     put:
       summary: Assign author to book
@@ -122,6 +133,17 @@ paths:
     get:
       summary: List all authors
       operationId: listAuthors
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
       responses:
         "200":
           description: A list of authors
@@ -150,7 +172,6 @@ paths:
                 $ref: "#/components/schemas/Author"
 
   /authors/{id}:
-    #Tek author getir
     get:
       summary: Get an author by ID
       operationId: getAuthor
@@ -169,7 +190,7 @@ paths:
                 $ref: "#/components/schemas/Author"
         "404":
           description: Not found
-    #Author güncelle
+
     put:
       summary: Update an author
       operationId: updateAuthor
@@ -194,7 +215,7 @@ paths:
                 $ref: "#/components/schemas/Author"
         "404":
           description: Not found
-    #Author sil
+
     delete:
       summary: Delete an author
       operationId: deleteAuthor
@@ -209,7 +230,7 @@ paths:
           description: Deleted
         "404":
           description: Not found
-  #Bu yazara ait kitapları getir
+
   /authors/{id}/books:
     get:
       summary: Get all books by author

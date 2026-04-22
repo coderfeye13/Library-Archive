@@ -52,6 +52,18 @@ type NewBook struct {
 	Title         string `json:"title"`
 }
 
+// ListAuthorsParams defines parameters for ListAuthors.
+type ListAuthorsParams struct {
+	Page  *int `form:"page,omitempty" json:"page,omitempty"`
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
+// ListBooksParams defines parameters for ListBooks.
+type ListBooksParams struct {
+	Page  *int `form:"page,omitempty" json:"page,omitempty"`
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
 // CreateAuthorJSONRequestBody defines body for CreateAuthor for application/json ContentType.
 type CreateAuthorJSONRequestBody = NewAuthor
 
@@ -71,7 +83,7 @@ type AssignAuthorToBookJSONRequestBody = AssignAuthor
 type ServerInterface interface {
 	// List all authors
 	// (GET /authors)
-	ListAuthors(ctx echo.Context) error
+	ListAuthors(ctx echo.Context, params ListAuthorsParams) error
 	// Create an author
 	// (POST /authors)
 	CreateAuthor(ctx echo.Context) error
@@ -89,7 +101,7 @@ type ServerInterface interface {
 	GetBooksByAuthor(ctx echo.Context, id int) error
 	// List all books
 	// (GET /books)
-	ListBooks(ctx echo.Context) error
+	ListBooks(ctx echo.Context, params ListBooksParams) error
 	// Create a book
 	// (POST /books)
 	CreateBook(ctx echo.Context) error
@@ -116,8 +128,24 @@ type ServerInterfaceWrapper struct {
 func (w *ServerInterfaceWrapper) ListAuthors(ctx echo.Context) error {
 	var err error
 
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListAuthorsParams
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page", ctx.QueryParams(), &params.Page)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter page: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.ListAuthors(ctx)
+	err = w.Handler.ListAuthors(ctx, params)
 	return err
 }
 
@@ -198,8 +226,24 @@ func (w *ServerInterfaceWrapper) GetBooksByAuthor(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) ListBooks(ctx echo.Context) error {
 	var err error
 
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListBooksParams
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page", ctx.QueryParams(), &params.Page)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter page: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.ListBooks(ctx)
+	err = w.Handler.ListBooks(ctx, params)
 	return err
 }
 
@@ -322,19 +366,19 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/9RYQW/bPAz9Kwa/72jU6dZTbu4KFAWGYoftVBSFYjOJWlvSJKaDEfi/D5Ls2m1kI96W",
-	"ND1FkUiT75HUS7yFTJZKChRkYL4Fk62xZG6ZGsNXIt3QWmr7XWmpUBNHd8rc/gPP7ReqFMIcuCBcoYa6",
-	"jkHjzw3XmMP8rmd7H7e2cvGIGUEdw1CEBZe9ZxvSXKysfThkDIKVGHCoAyEvpXwagmRX/2tcwhz+Szpy",
-	"koaZpEm3jscpGM5TbRYFN2vMHypkOmxDnIp9wdzir6kUDlPVL5uzug9HHGPw4UDI+7l5s3i0tawPF0tP",
-	"gX8sfOULzXQVpTpb82eM0m83EMMzasOlgDmcn83OZjYPqVAwxWEOn91WDIrR2qFMfFC3XiHZD0sCIy7F",
-	"Te6CGEobG5u2UVIYz9Cn2cx+ZFIQCufKlCp45pyTR2OTaKfQrjhhafZvyYYBpjWrPAE5mkxzRR5eGhXc",
-	"UCSXUYvB2phNWTJdNZlHrCi64xiUNAGMXzQywiayrw0aupR5NQnfGKyusevX5Se9wXqH2PN/Frgf9TV/",
-	"HnX+hjW/GzHR0OaO2y5JtjyvbcQcCyTcZfLK7b8wqZhmJRLa/rrbArdhbetBO7b2YnnLRtxDtnMZ3+9Q",
-	"deHz6SPzWeS24Beh81tJ0VJuxFvs3q+PPQ4PxTXSUTHOjtAOaWS4WBXYwz6JvGukjrloUUU3V/6eDPD3",
-	"Q+Xs8G3y7lN8jLJ5Kqf3uvcbm/NkIeXTsDBcI1nhNJfVCY/CXpLj9H+S4DhmbI/Tmpu/Gpii6B7WL8Q4",
-	"91baHPlwwvwMyXFzOC7GLubBhtgjOq4QdzGnyLBjq9cSeypwQ997629QXRtI8ei18uGEdai8L7Laop5+",
-	"RzjXvRT1sMy98ygevlYvWhpUyuAoJt0f7WBd+i8evsuPVp9Xr01OpEg+m4i51P7gh4/H1P5OJdmWta5/",
-	"BwAA//9SgmUfQBIAAA==",
+	"H4sIAAAAAAAC/+RYUU/cMAz+K1W2x4oeG0/3dgwJIU1oD9sTQijX+u4MbRISl6k69b9PSVpaIK2ubHeA",
+	"9tQ2sWN/n+3Y6palslBSgCDD5ltm0g0U3L0ujMG1WJS0kdp+Ky0VaEJwu9yt32BmP6hSwOYMBcEaNKvr",
+	"mGm4L1FDxuZXPdnruJWVy1tIidUxG7KwRNk725BGsbbyYZMxE7yAgEIdMHkq5d0QJPv2WcOKzdmnpCMn",
+	"aZhJGnfreJyCYT9VuczRbCC7qYDrsAwh5buCuYTfUykcpqofNid1HbY4xuDNnpD3ffNi8WhqWR0UK0+B",
+	"P5Z9x6XmuooWOt3gA0SLHxcsZg+gDUrB5uz4aHY0s35IBYIrZHP21S3FTHHaOJSJN+re10D2YUnghFJc",
+	"ZM6IoUUjY/U0L4DAKlxtGVoz9yXoirWBYIqvLRifYuGCCivmWCCNa15b4oySwvgYfZnN7COVgkA457lS",
+	"OabO/eTWWBq2vQORoDC7F0Vjn2vNKx+CDEyqUZEneBHlaCiSq6hl0cqYsii4rhruIp7n3XbMlDQBlr9p",
+	"4ASNZZ8dYOhUZtUkfGOwutKqnyYg6RLqF8Qe/zPDfatP+fOos2es+dWIi4Y2t93mabLFrLYWM8iB4CWT",
+	"Z279kclQwtrk79IOM/acjYk5eOL96SPzXmQ24Ceh/UtJ0UqW4jl2r9fHHofL8hzooBhnB0iHRWRQrHPo",
+	"YZ9E3jlQx1y0rKKLM39TB/j7pTK+/zR58yo+RNg8ldNz3euN1XmylPJuuDWdA9nWbU6rd1wKO7UcN4FM",
+	"ajiOGZvjtEHzVwWT591h/UCMc29bmyP/PxkKXhmhoYGg2RwfB5zNvV0jHtFhR4HO5pRBwLHVS8odZ4CG",
+	"vreeAIL9vYEUj15sH661D4X3sbG3qKffUk51p56+X+beuBT3H6vHbh7s1cFSTLqfDcG49H++/JQfLT5P",
+	"fh29kyB5byLuXHvF6OUxtZMyyTasdf0nAAD//2rAsr9EEwAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
